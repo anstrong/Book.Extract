@@ -19,16 +19,22 @@ filename = str(z)
 file = open(path + filename,"w") 
 
 # Split url
-f = y.find('_')
+f = y.rfind('_')
+g = y.rfind('/')
 
 if f == -1:
 	start1 = y.rfind('/') + 1
 	end1 = y.find('.html')
 	code = y[start1:end1]
 
+elif f !=-1 and (f < g):
+	start1 = y.rfind('/') + 1
+	end1 = y.find('.html')
+	code = y[start1:end1]
+
 else:
 	start1 = y.rfind('/') + 1
-	end1 = y.find('_') 
+	end1 = y.rfind('_') 
 	code = y[start1:end1]
 
 start = y.find('www.')
