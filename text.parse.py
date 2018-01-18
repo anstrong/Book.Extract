@@ -1,75 +1,104 @@
 from urllib.request import Request, urlopen
 from bs4 import BeautifulSoup, SoupStrainer
 import time
+import subprocess
 
-# https://www.8novels.net/classics/u6082.html
+# http://www.8novels.net/classics/u6082.html
 
-# Get url
-y = input("What's the url of the book you want to parse? ")
+def read_html(url):
+	html = urlopen(url).read()
 
-# Split url
-f = y.rfind('_')
-g = y.rfind('/')
+	return html
 
-if f == -1:
-	start1 = y.rfind('/') + 1
-	end1 = y.find('.html')
-	code = y[start1:end1]
+def get_url(y):
+	f = y.rfind('_')
+	g = y.rfind('/')
 
-elif f !=-1 and (f < g):
-	start1 = y.rfind('/') + 1
-	end1 = y.find('.html')
-	code = y[start1:end1]
+	if f == -1:
+		start1 = y.rfind('/') + 1
+		end1 = y.find('.html')
+		code = y[start1:end1]
 
-else:
-	start1 = y.rfind('/') + 1
-	end1 = y.rfind('_')
-	code = y[start1:end1]
+	elif f !=-1 and (f < g):
+		start1 = y.rfind('/') + 1
+		end1 = y.find('.html')
+		code = y[start1:end1]
 
-start = y.find('www.')
-end = y.find(str(code))
-path = y[start:end]
+	else:
+		start1 = y.rfind('/') + 1
+		end1 = y.rfind('_')
+		code = y[start1:end1]
 
-# Get number of pages
-x = int(input("How many pages in the book? "))
+	start = y.find('www.')
+	end = y.find(str(code))
+	path = y[start:end]
 
-# Get name
-z = input("What's the name of the book? ")
+	return path, code
+
+def get_title(html):
+	title_text = SoupStrainer("title")
+	title_soup = str(BeautifulSoup(html, "html.parser", parse_only=title_text))
+
+	title_start = title_soup.find('Read ') + 5
+	title_end = title_soup.find(' online')
+	title = title_soup[title_start:title_end]
+
+	return title
+
+def get_pages(html):
+	page_text = SoupStrainer("ul", {'class':'pagelist'})
+	page_soup = str(BeautifulSoup(html, "html.parser", parse_only=page_text))
+
+	pages_start = page_soup.find('<ul class="pagelist"><li><a>') + 28
+	pages_end = page_soup.find('pages:')
+	pages = page_soup[pages_start:pages_end]
+
+	return pages
+
+def make_file(name):
+	path = '/Users/annabelle_strong/Documents/Bin/Extracted Texts/'
+	title = str(name)
+
+	filename = str(path + title + ".txt")
+
+	file = open(filename,"w")
+
+	return file, filename
+
+# Get full url
+address = input("What's the url of the book you want to parse? ")
+
+# Split url for page looping and processing
+raw_url = get_url(address)
+path = raw_url[0]
+code = raw_url[1]
+
+# Load webpage with full url
+url = Request(address, headers={'User-Agent': 'Mozilla/5.0'})
+
+# Parse page
+setup_html = read_html(url)
+
+# Get name of book
+title = get_title(setup_html)
 
 # Create .txt file
-path = '/Users/annabelle_strong/Documents/Bin/Extracted Texts/'
-filename = str(z)
+txt = make_file(title)
+file = txt[0]
+filename = str(txt[1])
 
-file = open(path + filename + ".txt","w")
+# Get number of pages
+pages = int(get_pages(setup_html))
 
 # Loop through pages
-for a in range(1, x+1):
-	# Use split url to form complete url
-	if a == 1:
-		url = Request('http://' + str(path) + str(code) + '.html', headers={'User-Agent': 'Mozilla/5.0'})
-		'''
-		# Read html
-		html = urlopen(url).read()
-
-		# Filter paragraph text and parse page
-		title = SoupStrainer("title")
-
-		title_soup = BeautifulSoup(html, "html.parser", parse_only=title)
-
-		# Filter paragraph text and parse page
-		pages = SoupStrainer("ul", {'class':'pagelist'})
-
-		pages_soup = BeautifulSoup(html, "html.parser", parse_only=pages)
-
-		print(title_soup)
-		print(pages_soup)
-		'''
+for a in range(1, pages+1):
+	if a != 1:
+		# Load new url based on page number
+		new_url = Request('http://' + str(path) + str(code) + '_' + str(a) +'.html', headers={'User-Agent': 'Mozilla/5.0'})
+		# Read updated html
+		html = read_html(new_url)
 	else:
-		url = Request('http://' + str(path) + str(code) + '_' + str(a) +'.html', headers={'User-Agent': 'Mozilla/5.0'})
-
-
-	# Read html
-	html = urlopen(url).read()
+		html = setup_html
 
 	# Filter paragraph text and parse page
 	p = SoupStrainer("p")
@@ -90,5 +119,6 @@ for a in range(1, x+1):
 	# Write text to document
 	file.write(text)
 
-
 print("Text extraction complete.")
+
+subprocess.call(["open", "-R", filename])
