@@ -6,16 +6,19 @@ import subprocess
 # http://www.8novels.net/classics/u6082.html
 
 def read_html(url):
+	# Open and parse the page
 	html = urlopen(url).read()
 
 	return html
 
 def get_url(y):
+	# Add end 'index' code if code not included
 	h = y.rfind('.html')
 
 	if h == -1:
 		y = str(y + 'index.html')
 
+	# Isolate 'code' (page identifier) for processing
 	f = y.rfind('_')
 	g = y.rfind('/')
 
@@ -34,6 +37,7 @@ def get_url(y):
 		end1 = y.rfind('_')
 		code = y[start1:end1]
 
+	# Identify 'path' (rest of url) using code
 	start = y.find('www.')
 	end = y.find(str(code))
 	path = y[start:end]
@@ -41,9 +45,11 @@ def get_url(y):
 	return path, code
 
 def get_title(html):
+	# Find Title element
 	title_text = SoupStrainer("title")
 	title_soup = str(BeautifulSoup(html, "html.parser", parse_only=title_text))
 
+	# Isolate actual title
 	title_start = title_soup.find('Read ') + 5
 	title_end = title_soup.find(' online')
 	title = title_soup[title_start:title_end]
@@ -51,9 +57,11 @@ def get_title(html):
 	return title
 
 def get_pages(html):
+	# Find text in which the number of pages is wrapped
 	page_text = SoupStrainer("ul", {'class':'pagelist'})
 	page_soup = str(BeautifulSoup(html, "html.parser", parse_only=page_text))
 
+	# Isolate number of pages
 	pages_start = page_soup.find('<ul class="pagelist"><li><a>') + 28
 	pages_end = page_soup.find('pages:')
 	pages = page_soup[pages_start:pages_end]
@@ -61,11 +69,12 @@ def get_pages(html):
 	return pages
 
 def make_file(name):
-	path = '/Users/annabelle_strong/Documents/Bin/Extracted Texts/'
+	# Create filename based on book title and directory
 	title = str(name)
-
+	path = '/Users/annabelle_strong/Documents/Bin/Extracted Texts/'
 	filename = str(path + title + ".txt")
 
+	# 'Open' (or create if nonexistent) file
 	file = open(filename,"w")
 
 	return file, filename
@@ -124,6 +133,8 @@ for a in range(1, pages+1):
 	# Write text to document
 	file.write(text)
 
+# Print confirmation
 print("Text extraction complete.")
 
+# Open file location
 subprocess.call(["open", "-R", filename])
