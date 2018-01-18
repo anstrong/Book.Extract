@@ -3,7 +3,9 @@ from bs4 import BeautifulSoup, SoupStrainer
 import time
 import subprocess
 
-# http://www.8novels.net/classics/u6082.html
+# STATION ELEVEN: http://www.8novels.net/classics/u6082.html
+
+####################################### FUNCTIONS ###############################################
 
 def read_html(url):
 	# Open and parse the page
@@ -79,6 +81,9 @@ def make_file(name):
 
 	return file, filename
 
+
+########################################## LOGIC ###############################################
+
 # Get full url
 address = input("What's the url of the book you want to parse? ")
 
@@ -103,6 +108,7 @@ filename = str(txt[1])
 
 # Get number of pages
 pages = int(get_pages(setup_html))
+
 
 # Loop through pages
 for a in range(1, pages+1):
@@ -132,6 +138,7 @@ for a in range(1, pages+1):
 
 	# Write text to document
 	file.write(text)
+
 
 # Print confirmation
 print("Text extraction complete.")
