@@ -38,12 +38,6 @@ def get_url(y):
 	end = y.find(str(code))
 	path = y[start:end]
 
-	print('	')
-	print(path)
-	print('	')
-	print(code)
-	print('	')
-
 	return path, code
 
 def get_title(html):
