@@ -11,6 +11,11 @@ def read_html(url):
 	return html
 
 def get_url(y):
+	h = y.rfind('.html')
+
+	if h == -1:
+		y = str(y + 'index.html')
+
 	f = y.rfind('_')
 	g = y.rfind('/')
 
@@ -32,6 +37,12 @@ def get_url(y):
 	start = y.find('www.')
 	end = y.find(str(code))
 	path = y[start:end]
+
+	print('	')
+	print(path)
+	print('	')
+	print(code)
+	print('	')
 
 	return path, code
 
@@ -74,7 +85,7 @@ path = raw_url[0]
 code = raw_url[1]
 
 # Load webpage with full url
-url = Request(address, headers={'User-Agent': 'Mozilla/5.0'})
+url = Request('http://' + str(path) + str(code) +'.html', headers={'User-Agent': 'Mozilla/5.0'})
 
 # Parse page
 setup_html = read_html(url)
