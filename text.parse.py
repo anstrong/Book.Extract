@@ -1,6 +1,5 @@
 from urllib.request import Request, urlopen
 from bs4 import BeautifulSoup, SoupStrainer
-import time
 import subprocess
 
 # STATION ELEVEN: http://www.8novels.net/classics/u6082.html
