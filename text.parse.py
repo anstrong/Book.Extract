@@ -1,6 +1,7 @@
 from urllib.request import Request, urlopen
 from bs4 import BeautifulSoup, SoupStrainer
 import subprocess
+import re
 
 # STATION ELEVEN: http://www.8novels.net/classics/u6082.html
 
@@ -80,6 +81,37 @@ def make_file(name):
 
 	return file, filename
 
+def split_chapters(text):
+	index = text.find("Chapter")
+
+	if index != -1:
+		text = text[:index - 1] + " " + text[index:]
+
+		subtext = text[index:index + 15].split(" ")
+
+		print(subtext)
+
+		caps = re.findall('([A-Z])', subtext[1])
+
+		print(caps)
+
+		word_1_index = subtext[1].find(caps[0])
+
+		if len(caps) > 1:
+			word_2_index = subtext[1].find(caps[1])
+
+		if word_1_index != 0:
+			subtext[1] = subtext[1][:word_1_index] + " " + subtext[1][word_1_index:]
+		else:
+			subtext[1] = subtext[1][:word_2_index] + " " + subtext[1][word_2_index:]
+
+		subtext = str(' '.join(subtext))
+
+		print(subtext)
+
+		text = text[:index] + subtext + text[index + 15:]
+
+	return text
 
 ########################################## LOGIC ###############################################
 
@@ -134,6 +166,8 @@ for a in range(1, pages+1):
 
 	# Extract text
 	text = soup.get_text()
+
+	text = split_chapters(text)
 
 	# Write text to document
 	file.write(text)
